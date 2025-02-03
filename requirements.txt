@@ -1,0 +1,23 @@
+openai==1.60.1
+langfuse==2.57.12
+streamlit==1.41.1
+python-dotenv==1.0.1
+
+# dla app1:
+# langfuse
+# pandas
+# pycaret
+# python-dotenv
+# streamlit
+# openai
+# boto3==1.35.99
+
+# dla app2:
+# boto3==1.35.99
+# instructor
+# langfuse==2.57.5
+# openai
+# pycaret==3.3.2
+# pydantic==2.9.2
+# python-dotenv
+# streamlit
