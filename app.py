@@ -30,6 +30,12 @@ if 'height' not in st.session_state:
     st.session_state.height = 170
 if 'sport_activity' not in st.session_state:
     st.session_state.sport_activity = 1
+
+# Oznaczenie, ze dane nie zostały jeszcze wyciągnięte z AI
+if 'data_extracted' not in st.session_state:
+    st.session_state.data_extracted = False
+
+# Wartości poczatkowe dla problemow z odswiezaniem
 if 'needs_calculation' not in st.session_state:
     st.session_state.needs_calculation = False
 if 'current_activity_display' not in st.session_state:
@@ -75,12 +81,13 @@ def slider_callback():
     st.session_state.needs_calculation = True
 
 
-@st.cache_data(ttl=0)  # usuwanie cachu dla pycareta
-def make_prediction(model, data):
-    return predict_model(model, data=data)
+# @st.cache_data(ttl=0)  # usuwanie cachu dla pycareta
+# def make_prediction(model, data):
+#     return predict_model(model, data=data)
 
 
 # Zapytanie do openAI, podpięte pod Langfuse
+@st.cache_resource
 @observe()
 def get_data_from_text(text):
 
@@ -202,7 +209,6 @@ def get_data_from_text(text):
     return gender, age, weight, height, sport_activity
 
 
-@st.cache_data
 def calculate_time_to_run_5k(gender, age, weight, height, sport_activity):
 
     # inicjalizacja
@@ -213,25 +219,25 @@ def calculate_time_to_run_5k(gender, age, weight, height, sport_activity):
 
     # Bazowe czasy w SEKUNDACH na 5km
     if sport_activity == 1:
-        time = 5400  # 90 minut - bardzo wolny spacer
+        time = 3000  # 43 minut - bardzo wolny spacer
     elif sport_activity == 2:
-        time = 4500  # 75 minut - wolny spacer
+        time = 2700  # 41 minut - wolny spacer
     elif sport_activity == 3:
-        time = 3600  # 60 minut - spacer
+        time = 2500  # 38 minut - spacer
     elif sport_activity == 4:
-        time = 3000  # 50 minut - marsz
+        time = 2300  # 35 minut - marsz
     elif sport_activity == 5:
-        time = 2700  # 45 minut - szybki marsz
+        time = 2100  # 33 minut - szybki marsz
     elif sport_activity == 6:
-        time = 2400  # 40 minut - trucht
+        time = 1900  # 31 minut - trucht
     elif sport_activity == 7:
-        time = 2100  # 35 minut - wolny bieg
+        time = 1700  # 28 minut - wolny bieg
     elif sport_activity == 8:
-        time = 1800  # 30 minut - przyzwoity, amatorski bieg
+        time = 1500  # 25 minut - przyzwoity, amatorski bieg
     elif sport_activity == 9:
-        time = 1500  # 25 minut - dobry czas
+        time = 1300  # 22 minut - dobry czas
     elif sport_activity == 10:
-        time = 1200  # 20 minut - bardzo dobry czas
+        time = 1100  # 18 minut - bardzo dobry czas
     else:  # 11
         time = 900   # 15 minut - świetny czas
 
@@ -241,21 +247,21 @@ def calculate_time_to_run_5k(gender, age, weight, height, sport_activity):
     if bmi >= 35:
         time *= 2.0    # podwójny czas dla znacznej otyłości
     elif bmi >= 30:
-        time *= 1.5    # +50% czasu dla otyłości
+        time *= 1.25    # +25% czasu dla otyłości
     elif bmi >= 25:
-        time *= 1.25    # +25% czasu dla nadwagi
+        time *= 1.15    # +15% czasu dla nadwagi
     elif bmi < 18.5:
-        time *= 1.1    # +10% czasu dla znacznej niedowagi (brak miesni)
+        time *= 1.1    # +10% czasu dla znacznej niedowagi (braku mięśni)
 
     # Wpływ płci
     if gender == "K":
-        time *= 1.1    # +10% czasu dla kobiet
+        time *= 1.05    # +5% czasu dla kobiet
 
     # Wpływ wieku
     if age >= 65:
-        time *= 1.05   # +5% czasu
+        time *= 1.05   # +5% czasu dla starszych
     elif age >= 45:
-        time *= 1.05    # +5% czasu
+        time *= 1.05    # +5% czasu dla średniego wieku
 
     return round(time)  # zwracamy czas w SEKUNDACH
 
@@ -272,7 +278,8 @@ st.write("")
 # Tworzymy pole tekstowe
 user_input = st.text_area("Podaj proszę swój wiek, płeć, wagę i wzrost. A także napisz trochę o swojej aktywności fizycznej. Jakie sporty uprawiasz i z jakim natężeniem.", height=100,   max_chars=250)
 
-if user_input:
+if user_input and not st.session_state.data_extracted:
+
     response = get_data_from_text(user_input)
     if response:
         gender, age, weight, height, sport_activity = response
@@ -284,199 +291,197 @@ if user_input:
         st.session_state.height = height
         st.session_state.sport_activity = sport_activity
 
-        # Ustawienia ograniczeń
-        AGE_MIN, AGE_MAX = 10, 100
-        WEIGHT_MIN, WEIGHT_MAX = 45, 350
-        HEIGHT_MIN, HEIGHT_MAX = 120, 250
+        # Oznacz, że dane zostały juz wyciągnięte
+        st.session_state.data_extracted = True
 
-        # Obliczanie BMI
-        bmi = calculate_bmi(weight, height)
+if user_input:
 
+    # Ustawienia ograniczeń
+    AGE_MIN, AGE_MAX = 10, 100
+    WEIGHT_MIN, WEIGHT_MAX = 45, 350
+    HEIGHT_MIN, HEIGHT_MAX = 120, 250
+
+    # Obliczanie BMI
+    bmi = calculate_bmi(st.session_state.weight, st.session_state.height)
+
+    st.write("")
+    st.write(' Jeśli coś pokręciłem (a jestem tylko biedną, sztuczną inteligencją), to z góry przepraszam. Na szczęście możesz ręcznie wprowadzić odpowiednie poprawki.')
+
+    # Moj wesoły obrazek
+    st.image('ewolucja.png')
+
+    # Ustawianie kolumn
+    col1, col2, col3 = st.columns([0.15, 5, 0.15])
+
+    with col1:
         st.write("")
-        st.write(' Jeśli coś pokręciłem (a jestem tylko biedną, sztuczną inteligencją), to z góry przepraszam. Na szczęście możesz wprowadzić ręcznie odpowiednie poprawki.')
 
-        # Moj wesoły obrazek
-        st.image('ewolucja.png')
+    with col2:
 
-        # Ustawianie kolumn
-        col1, col2, col3 = st.columns([0.15, 5, 0.15])
+        # Callback dla suwaka
+        def update_activity():
+            st.session_state.sport_activity = st.session_state.activity_slider
+
+        current_activity = st.slider(
+            "Stopień aktywności fizycznej:",
+            min_value=1,
+            max_value=11,
+            value=st.session_state.sport_activity,
+            key='activity_slider',
+            on_change=update_activity
+        )
+
+        # Lista napisów odpowiadających pozycjom suwaka
+        napisy = [
+            "Władca kanapy",
+            "Mistrz kulinarnego maratonu",
+            "Medal za walkę z grawitacją",
+            "Biegacz do lodówki",
+            "Stylowy spacerniak",
+            "Sprintem, to co najwyżej na przystanek",
+            "Szef porannych rozciągów",
+            "Wyginam śmiało ciało... dla mnie to mało!",
+            "Król Biceps Pierwszy",
+            "Szaleństwo cardio",
+            "Szybki jak Sonic"
+        ]
+
+        # Wyświetlanie napisu w zależności od pozycji suwaka, z centrowaniem
+        st.markdown(
+            f"<h5 style='text-align: center;'>{napisy[current_activity - 1]}</h5>",
+            unsafe_allow_html=True
+        )
+        st.write("")
+
+    with col3:
+        st.write("")
+
+    with st.form("input_form"):
+        col1, col2, col3, col4, col5, col6, col7, col8, col9 = st.columns([1, 5, 1, 5, 1, 5, 1, 5, 1])
 
         with col1:
             st.write("")
 
         with col2:
-
-            # Callback dla suwaka
-            def update_activity():
-                st.session_state.sport_activity = st.session_state.activity_slider
-
-            current_activity = st.slider(
-                "Stopień aktywności fizycznej:",
-                min_value=1,
-                max_value=11,
-                value=st.session_state.sport_activity,
-                key='activity_slider',
-                on_change=update_activity
-            )
-
-            # Lista napisów odpowiadających pozycjom suwaka
-            napisy = [
-                "Władca kanapy",
-                "Mistrz kulinarnego maratonu",
-                "Medal za walkę z grawitacją",
-                "Biegacz do lodówki",
-                "Stylowy spacerniak",
-                "Sprintem, to co najwyżej na przystanek",
-                "Szef porannych rozciągów",
-                "Wyginam śmiało ciało... dla mnie to mało!",
-                "Król Biceps Pierwszy",
-                "Szaleństwo cardio",
-                "Szybki jak Sonic"
-            ]
-
-            # Wyświetlanie napisu w zależności od pozycji suwaka, z centrowaniem
-            st.markdown(
-                f"<h5 style='text-align: center;'>{napisy[current_activity - 1]}</h5>",
-                unsafe_allow_html=True
-            )
-            st.write("")
+            # Płeć
+            gender_index = 0 if st.session_state.gender == "Mężczyzna" else 1
+            st.session_state.gender = st.selectbox(
+                "Płeć:",
+                options=["Mężczyzna", "Kobieta"],
+                index=gender_index)
 
         with col3:
             st.write("")
 
-        with st.form("input_form"):
-            col1, col2, col3, col4, col5, col6, col7, col8, col9 = st.columns([1, 5, 1, 5, 1, 5, 1, 5, 1])
+        with col4:
+            # Wiek
+            age_input = st.number_input(
+                "Wiek (lata):",
+                value=st.session_state.age,
+                min_value=AGE_MIN,
+                max_value=AGE_MAX,
+                step=1
+            )
+            st.session_state.age = validate_input(age_input, AGE_MIN, AGE_MAX)
 
-            with col1:
-                st.write("")
-
-            with col2:
-                # Płeć
-                st.session_state.gender = st.selectbox(
-                    "Płeć:",
-                    options=["Mężczyzna", "Kobieta"],
-                    index=0 if st.session_state.gender == "Mężczyzna" else 1
-                )
-
-            with col3:
-                st.write("")
-
-            with col4:
-                # Wiek
-                age_input = st.number_input(
-                    "Wiek (lata):",
-                    value=st.session_state.age,
-                    min_value=AGE_MIN,
-                    max_value=AGE_MAX,
-                    step=1
-                )
-                st.session_state.age = validate_input(age_input, AGE_MIN, AGE_MAX)
-
-            with col5:
-                st.write("")
-
-            with col6:
-                # Waga
-                weight_input = st.number_input(
-                    "Waga (kg):",
-                    value=st.session_state.weight,
-                    min_value=WEIGHT_MIN,
-                    max_value=WEIGHT_MAX,
-                    step=1
-                )
-                st.session_state.weight = validate_input(weight_input, WEIGHT_MIN, WEIGHT_MAX)
-
-            with col7:
-                st.write("")
-
-            with col8:
-                # Wzrost
-                height_input = st.number_input(
-                    "Wzrost (cm):",
-                    value=st.session_state.height,
-                    min_value=HEIGHT_MIN,
-                    max_value=HEIGHT_MAX,
-                    step=1
-                )
-                st.session_state.height = validate_input(height_input, HEIGHT_MIN, HEIGHT_MAX)
-
-            with col9:
-                st.write("")
-
-            st.write("")
+        with col5:
             st.write("")
 
-            # Przycisk do zatwierdzenia danych
-            submit_button = st.form_submit_button("Zatwierdź zmiany")
+        with col6:
+            # Waga
+            weight_input = st.number_input(
+                "Waga (kg):",
+                value=st.session_state.weight,
+                min_value=WEIGHT_MIN,
+                max_value=WEIGHT_MAX,
+                step=1
+            )
+            st.session_state.weight = validate_input(weight_input, WEIGHT_MIN, WEIGHT_MAX)
 
-            if submit_button:
+        with col7:
+            st.write("")
 
-                st.session_state.needs_rerun = True
-                st.rerun()
+        with col8:
+            # Wzrost
+            height_input = st.number_input(
+                "Wzrost (cm):",
+                value=st.session_state.height,
+                min_value=HEIGHT_MIN,
+                max_value=HEIGHT_MAX,
+                step=1
+            )
+            st.session_state.height = validate_input(height_input, HEIGHT_MIN, HEIGHT_MAX)
 
-            if st.session_state.needs_rerun:
-                st.session_state.needs_rerun = False
+        with col9:
+            st.write("")
 
-                # Czyszczenie cachu
-                # st.cache_data.clear()
+        st.write("")
+        st.write("")
 
-                # Ponowne wczytanie modelu
-                model = load_model('maraton_rafal_model')
+        # Przycisk do zatwierdzenia danych
+        submit_button = st.form_submit_button("Zatwierdź zmiany")
 
-                current_gender = "K" if st.session_state.gender == "Kobieta" else "M"
-                speed = calculate_time_to_run_5k(
-                    current_gender,
-                    st.session_state.age,
-                    st.session_state.weight,
-                    st.session_state.height,
-                    st.session_state.sport_activity
-                )
+        if submit_button:
 
-                # Utworzenie df z danymi
-                df = pd.DataFrame({
-                    'gender': current_gender,
-                    'age': st.session_state.age,
-                    'speed': speed
-                }, index=[0])
-                df.columns = ['Płeć', 'Wiek', '5 km Czas']
+            st.session_state.needs_rerun = True
+            st.rerun()
 
-                # Wykonanie predykcji i odczyt wyniku
-                prediction = predict_model(model, data=df)
-                czas = int(prediction.loc[0, 'prediction_label'])
+        if st.session_state.needs_rerun:
+            st.session_state.needs_rerun = False
 
-                # Debug print
-                st.write("DataFrame przekazywany do modelu:")
-                st.write(df)
-                st.write(czas)
+            # Ponowne wczytanie modelu
+            # model = load_model('maraton_rafal_model')
 
-                # seconds = format_time(czas)
-                total_minutes = czas // 60
-                hours = total_minutes // 60
-                minutes = total_minutes % 60
+            current_gender = "K" if st.session_state.gender == "Kobieta" else "M"
+            speed = calculate_time_to_run_5k(
+                current_gender,
+                st.session_state.age,
+                st.session_state.weight,
+                st.session_state.height,
+                st.session_state.sport_activity
+            )
 
-                # Zastosowanie reguł zaokrąglania
-                if hours > 5:
-                    minutes = 0  # Zwraca godziny i 0 minut
-                elif 2 <= hours <= 5:
-                    # Zaokrąglamy do kwadransów
-                    if minutes % 15 > 7.5:
-                        minutes = (minutes // 15 + 1) * 15  # Zaokrąglij do najbliższych 15 minut
-                    else:
-                        minutes = (minutes // 15) * 15
+            # Utworzenie df z danymi
+            df = pd.DataFrame({
+                'gender': current_gender,
+                'age': st.session_state.age,
+                'speed': speed
+            }, index=[0])
+            df.columns = ['Płeć', 'Wiek', '5 km Czas']
+
+            # Wykonanie predykcji i odczyt wyniku
+            prediction = predict_model(model, data=df)
+            czas = int(prediction.loc[0, 'prediction_label'])
+
+            # seconds = format_time(czas)
+            total_minutes = czas // 60
+            hours = total_minutes // 60
+            minutes = total_minutes % 60
+
+            # Zastosowanie reguł zaokrąglania
+            if hours > 5:
+                minutes = 0  # Zwraca godziny i 0 minut
+            elif 2 <= hours <= 5:
+                # Zaokrąglamy do kwadransów
+                if minutes % 15 > 7.5:
+                    minutes = (minutes // 15 + 1) * 15  # Zaokrąglij do najbliższych 15 minut
                 else:
-                    # Zaokrąglamy do 5 minut
-                    if minutes % 5 > 2.5:
-                        minutes = (minutes // 5 + 1) * 5  # Zaokrąglij do najbliższych 15 minut
-                    else:
-                        minutes = (minutes // 5) * 5
-                if hours >= 5:
-                    napis = 'Przewidywany czas biegu (jeśli można tak to nazwać) wynosi powyżej 5 godzin. Może więc warto zacząć raczej od spacerów? I zastanowić się nad zmianą trybu życia?'
-                if hours > 1 and hours < 5 and minutes > 0:
-                    napis = f"Przewidywany czas biegu wynosi {hours} godziny i {minutes} minut."
-                elif hours == 1 and minutes > 0:
-                    napis = f"Przewidywany czas biegu wynosi {hours} godzinę i {minutes} minut."
-                elif hours == 1 and minutes == 0:
-                    napis = f"Przewidywany czas biegu wynosi {hours} godzinę."
+                    minutes = (minutes // 15) * 15
+            else:
+                # Zaokrąglamy do 5 minut
+                if minutes % 5 > 2.5:
+                    minutes = (minutes // 5 + 1) * 5  # Zaokrąglij do najbliższych 15 minut
                 else:
-                    napis = f"Przewidywany czas biegu wynosi {hours} godziny."
-                st.markdown(f"<h6 style='font-size: 24px;'>{napis}</h6>", unsafe_allow_html=True)
+                    minutes = (minutes // 5) * 5
+
+            if hours >= 5:
+                napis = 'Przewidywany czas biegu (jeśli można tak to nazwać) wynosi powyżej 5 godzin. Może więc warto zacząć raczej od spacerów? I zastanowić się nad zmianą trybu życia?'
+            if hours > 1 and hours < 5 and minutes > 0:
+                napis = f"Przewidywany czas biegu wynosi {hours} godziny i {minutes} minut."
+            elif hours == 1 and minutes > 0:
+                napis = f"Przewidywany czas biegu wynosi {hours} godzinę i {minutes} minut."
+            elif hours == 1 and minutes == 0:
+                napis = f"Przewidywany czas biegu wynosi {hours} godzinę."
+            else:
+                napis = f"Przewidywany czas biegu wynosi {hours} godziny."
+            st.markdown(f"<h6 style='font-size: 24px;'>{napis}</h6>", unsafe_allow_html=True)
