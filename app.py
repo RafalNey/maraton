@@ -423,15 +423,6 @@ if user_input:
 
         if submit_button:
 
-            st.session_state.needs_rerun = True
-            st.rerun()
-
-        if st.session_state.needs_rerun:
-            st.session_state.needs_rerun = False
-
-            # Ponowne wczytanie modelu
-            # model = load_model('maraton_rafal_model')
-
             current_gender = "K" if st.session_state.gender == "Kobieta" else "M"
             speed = calculate_time_to_run_5k(
                 current_gender,
