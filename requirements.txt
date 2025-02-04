@@ -1,8 +1,8 @@
 imbalanced-learn==0.13.0
 langfuse==2.58.2
 numpy
-#numpy==1.26.4
-numpy-base==1.26.4
+# numpy==1.26.4
+# numpy-base==1.26.4
 matplotlib==3.7.1
 openai==1.61.0
 pandas==2.1.4
