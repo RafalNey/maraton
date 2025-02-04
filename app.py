@@ -245,13 +245,13 @@ def calculate_time_to_run_5k(gender, age, weight, height, sport_activity):
     bmi = calculate_bmi(weight, height)
 
     if bmi >= 35:
-        time *= 2.0    # podwójny czas dla znacznej otyłości
+        time *= 1.5    # +50% czasu dla znacznej otyłości
     elif bmi >= 30:
         time *= 1.25    # +25% czasu dla otyłości
     elif bmi >= 25:
-        time *= 1.15    # +15% czasu dla nadwagi
+        time *= 1.10    # +10% czasu dla nadwagi
     elif bmi < 18.5:
-        time *= 1.1    # +10% czasu dla znacznej niedowagi (braku mięśni)
+        time *= 1.05    # +5% czasu dla znacznej niedowagi (braku mięśni)
 
     # Wpływ płci
     if gender == "K":
