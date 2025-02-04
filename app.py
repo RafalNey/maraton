@@ -465,16 +465,10 @@ if user_input:
                 minutes = 0  # Zwraca godziny i 0 minut
             elif 2 <= hours < 5:
                 # Zaokrąglamy do kwadransów
-                if minutes % 15 > 7.5:
-                    minutes = (minutes // 15 + 1) * 15  # Zaokrąglij do najbliższych 15 minut
-                else:
-                    minutes = (minutes // 15) * 15
+                minutes = (minutes // 15) * 15
             else:
                 # Zaokrąglamy do 5 minut
-                if minutes % 5 > 2.5:
-                    minutes = (minutes // 5 + 1) * 5  # Zaokrąglij do najbliższych 15 minut
-                else:
-                    minutes = (minutes // 5) * 5
+                minutes = (minutes // 5) * 5
 
             if hours >= 5:
                 napis = 'Przewidywany czas biegu (jeśli można tak to nazwać) wynosi powyżej 5 godzin. Może więc warto zacząć raczej od spacerów? I zastanowić się poważnie nad zmianą trybu życia?'
