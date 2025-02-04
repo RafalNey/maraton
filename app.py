@@ -219,15 +219,15 @@ def calculate_time_to_run_5k(gender, age, weight, height, sport_activity):
 
     # Bazowe czasy w SEKUNDACH na 5km
     if sport_activity == 1:
-        time = 3000  # 43 minut - bardzo wolny spacer
+        time = 3500  # 59 minut - bardzo wolny spacer
     elif sport_activity == 2:
-        time = 2700  # 41 minut - wolny spacer
+        time = 3100  # 51 minut - wolny spacer
     elif sport_activity == 3:
-        time = 2500  # 38 minut - spacer
+        time = 2800  # 46 minut - spacer
     elif sport_activity == 4:
-        time = 2300  # 35 minut - marsz
+        time = 2500  # 41 minut - marsz
     elif sport_activity == 5:
-        time = 2100  # 33 minut - szybki marsz
+        time = 2200  # 36 minut - szybki marsz
     elif sport_activity == 6:
         time = 1900  # 31 minut - trucht
     elif sport_activity == 7:
@@ -245,7 +245,7 @@ def calculate_time_to_run_5k(gender, age, weight, height, sport_activity):
     bmi = calculate_bmi(weight, height)
 
     if bmi >= 35:
-        time *= 1.5    # +50% czasu dla znacznej otyłości
+        time *= 2    # +100% czasu dla znacznej otyłości
     elif bmi >= 30:
         time *= 1.25    # +25% czasu dla otyłości
     elif bmi >= 25:
