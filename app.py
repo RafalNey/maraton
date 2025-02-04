@@ -453,15 +453,17 @@ if user_input:
             prediction = predict_model(model, data=df)
             czas = int(prediction.loc[0, 'prediction_label'])
 
+            if speed > 2840:
+                czas = int(speed * 4.2)
             # seconds = format_time(czas)
             total_minutes = czas // 60
             hours = total_minutes // 60
             minutes = total_minutes % 60
 
             # Zastosowanie reguł zaokrąglania
-            if hours > 5:
+            if hours >= 5:
                 minutes = 0  # Zwraca godziny i 0 minut
-            elif 2 <= hours <= 5:
+            elif 2 <= hours < 5:
                 # Zaokrąglamy do kwadransów
                 if minutes % 15 > 7.5:
                     minutes = (minutes // 15 + 1) * 15  # Zaokrąglij do najbliższych 15 minut
@@ -475,13 +477,13 @@ if user_input:
                     minutes = (minutes // 5) * 5
 
             if hours >= 5:
-                napis = 'Przewidywany czas biegu (jeśli można tak to nazwać) wynosi powyżej 5 godzin. Może więc warto zacząć raczej od spacerów? I zastanowić się nad zmianą trybu życia?'
-            if hours > 1 and hours < 5 and minutes > 0:
+                napis = 'Przewidywany czas biegu (jeśli można tak to nazwać) wynosi powyżej 5 godzin. Może więc warto zacząć raczej od spacerów? I zastanowić się poważnie nad zmianą trybu życia?'
+            elif hours > 1 and hours < 5 and minutes > 0:
                 napis = f"Przewidywany czas biegu wynosi {hours} godziny i {minutes} minut."
+            elif hours > 1 and hours < 5 and minutes == 0:
+                napis = f"Przewidywany czas biegu wynosi {hours} godziny."
             elif hours == 1 and minutes > 0:
                 napis = f"Przewidywany czas biegu wynosi {hours} godzinę i {minutes} minut."
             elif hours == 1 and minutes == 0:
                 napis = f"Przewidywany czas biegu wynosi {hours} godzinę."
-            else:
-                napis = f"Przewidywany czas biegu wynosi {hours} godziny."
             st.markdown(f"<h6 style='font-size: 24px;'>{napis}</h6>", unsafe_allow_html=True)
