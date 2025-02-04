@@ -1,4 +1,4 @@
-altair==5.0.1
+altair==4.2.0
 imbalanced-learn==0.13.0
 langfuse==2.58.2
 # numpy
