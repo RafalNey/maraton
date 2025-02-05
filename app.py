@@ -267,7 +267,7 @@ def calculate_time_to_run_5k(gender, age, weight, height, sport_activity):
 
 
 # Wprowadzenie tytułu aplikacji
-st.markdown("<h1 style='text-align: center;'>Aplikacja do Wyliczania czasu na półmaraton wrocławski</h1>", unsafe_allow_html=True)
+st.markdown("<h1 style='text-align: center;'>Aplikacja do wyliczania czasu na półmaraton wrocławski</h1>", unsafe_allow_html=True)
 st.write("")
 st.write("")
 
@@ -431,7 +431,7 @@ if user_input:
                 st.session_state.height,
                 st.session_state.sport_activity
             )
-            
+
             # Ochrona pipe-line'a przed danymi wykraczającymi poza zakres.
             if speed < 2840:
 
