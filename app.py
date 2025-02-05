@@ -431,20 +431,23 @@ if user_input:
                 st.session_state.height,
                 st.session_state.sport_activity
             )
+            
+            # Ochrona pipe-line'a przed danymi wykraczającymi poza zakres.
+            if speed < 2840:
 
-            # Utworzenie df z danymi
-            df = pd.DataFrame({
-                'gender': current_gender,
-                'age': st.session_state.age,
-                'speed': speed
-            }, index=[0])
-            df.columns = ['Płeć', 'Wiek', '5 km Czas']
+                # Utworzenie df z danymi
+                df = pd.DataFrame({
+                    'gender': current_gender,
+                    'age': st.session_state.age,
+                    'speed': speed
+                }, index=[0])
+                df.columns = ['Płeć', 'Wiek', '5 km Czas']
 
-            # Wykonanie predykcji i odczyt wyniku
-            prediction = predict_model(model, data=df)
-            czas = int(prediction.loc[0, 'prediction_label'])
+                # Wykonanie predykcji i odczyt wyniku
+                prediction = predict_model(model, data=df)
+                czas = int(prediction.loc[0, 'prediction_label'])
 
-            if speed > 2840:
+            else:
                 czas = int(speed * 4.2)
 
             # seconds = format_time(czas)
