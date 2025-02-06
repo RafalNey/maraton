@@ -338,7 +338,7 @@ if user_input:
             "Medal za walkę z grawitacją",
             "Biegacz do lodówki",
             "Stylowy spacerniak",
-            "Sprintem, to co najwyżej na przystanek",
+            "Sprintem, co najwyżej na przystanek",
             "Szef porannych rozciągów",
             "Wyginam śmiało ciało... dla mnie to mało!",
             "Król Biceps Pierwszy",
