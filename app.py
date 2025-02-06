@@ -81,11 +81,6 @@ def slider_callback():
     st.session_state.needs_calculation = True
 
 
-# @st.cache_data(ttl=0)  # usuwanie cachu dla pycareta
-# def make_prediction(model, data):
-#     return predict_model(model, data=data)
-
-
 # Zapytanie do openAI, podpięte pod Langfuse
 @st.cache_resource
 @observe()
