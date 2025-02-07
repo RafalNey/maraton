@@ -157,20 +157,6 @@ def get_data_from_text(text):
     "sport_activity": 2
     }
 
-    I jeszcze jeden przykład:
-    ```
-    Sto lat, sto lat, niech żyje żyje nam, nie wstaje z kanapy.
-    ```
-
-    W tym przypadku odpowiedź powinna wyglądać tak:
-    {
-    "gender": "M",
-    "age": 100,
-    "weight": 80,
-    "height": 175,
-    "sport_activity": 1
-    }
-
     """
 
     messages = [
