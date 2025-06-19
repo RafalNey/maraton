@@ -1,5 +1,5 @@
 # Sekcja importowa
-import os
+# import os
 import json
 import pandas as pd
 import streamlit as st
@@ -109,7 +109,7 @@ def slider_callback():
 
 # Zapytanie do openAI, podpięte pod Langfuse
 @st.cache_resource
-@observe()
+# @observe()
 def get_data_from_text(text):
 
     # Inicjalizacja zmiennych
