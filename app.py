@@ -4,13 +4,39 @@ import json
 import pandas as pd
 import streamlit as st
 from dotenv import load_dotenv
-from langfuse import Langfuse
-from langfuse.decorators import observe
-from langfuse.openai import OpenAI as LangfuseOpenAI
+from openai import OpenAI
+# from langfuse import Langfuse
+# from langfuse.decorators import observe
+# from langfuse.openai import OpenAI as LangfuseOpenAI
 from pycaret.regression import load_model, predict_model
+
+# sekcja do obslugi AWS SSM Parameter Store
+import boto3
+from botocore.exceptions import ClientError
 
 # Wczytanie sekretow z .env
 load_dotenv()
+
+
+def get_openai_key():
+    ssm = boto3.client('ssm', region_name='eu-north-1')
+    try:
+        response = ssm.get_parameter(
+            Name='/find_friends/openai_api_key',
+            WithDecryption=True
+        )
+        return response['Parameter']['Value']
+    except ClientError as e:
+        st.error(f"Nie można pobrać klucza OpenAI: {e}")
+        return None
+
+
+openai_key = get_openai_key()
+
+if openai_key is None:
+    st.error("Brak klucza OpenAI. Aplikacja nie może działać.")
+else:
+    client = OpenAI(api_key=openai_key)
 
 # Wczytanie modelu regresyjnego
 model = load_model('maraton_rafal_model')
@@ -44,9 +70,9 @@ if 'needs_rerun' not in st.session_state:
     st.session_state.needs_rerun = False
 
 # Inicjacja Langfuse
-langfuse = Langfuse()
-langfuse.auth_check()
-llm_client = LangfuseOpenAI(api_key=os.environ.get('OPENAI_API_KEY'))
+# langfuse = Langfuse()
+# langfuse.auth_check()
+# llm_client = LangfuseOpenAI(api_key=os.environ.get('OPENAI_API_KEY'))
 
 # FUNKCJE ----------------------------------------------
 
@@ -170,7 +196,7 @@ def get_data_from_text(text):
         },
     ]
 
-    chat_completion = llm_client.chat.completions.create(
+    chat_completion = client.chat.completions.create(
         response_format={"type": "json_object"},
         messages=messages,
         model="gpt-4o-mini",
